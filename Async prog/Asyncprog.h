@@ -10,6 +10,9 @@ class Asyncprog : public QMainWindow
 public:
     Asyncprog(QWidget *parent = Q_NULLPTR);
 
+private slots:
+    void on_startButton_clicked();
+
 private:
     Ui::AsyncprogClass ui;
 };
