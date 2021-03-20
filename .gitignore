@@ -1,3 +1,7 @@
+*.sln
 *.ipch
+*.html
 .git/**
 .vs/**
+x64/**
+Async prog/x64/**
