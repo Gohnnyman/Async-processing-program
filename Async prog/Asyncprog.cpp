@@ -9,6 +9,7 @@
 #include <future>
 #include <QTextStream>
 #include <QDebug>
+#include <stdexcept>
 
 
 Asyncprog::Asyncprog(QWidget *parent)
@@ -20,26 +21,27 @@ Asyncprog::Asyncprog(QWidget *parent)
 
 
 
-size_t sizeOfCurve(QFileInfo& fileInfo, QMessageBox& debug)
+size_t sizeOfCurve(const QFileInfo& fileInfo)
 {
+    
     QFile file(fileInfo.absoluteFilePath());
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        return 1;
+        throw std::logic_error("File didn't open");
     }
 
     QTextStream in(&file);
     QString line;
     size_t rowCount = 0;
 
+
     size_t n = 0;
     while (!in.atEnd()) {
-        in >> line;
-        if (line == "</td>") rowCount++;
+        line = in.readLine();
+        if (line.indexOf("<tr>") != -1) rowCount++;
     }
 
     return rowCount;
-
 }
 
 
@@ -55,37 +57,33 @@ size_t htmlFilesCount(const QFileInfoList& fileInfoList)
 }
 
 void Asyncprog::on_startButton_clicked()
-{
-
-    QMessageBox m;
+{       
     QDir dir("./files");
     QFileInfoList fileInfoList = dir.entryInfoList();
     size_t filesCount = htmlFilesCount(fileInfoList);
-
-    std::future<size_t>* listOfSizes = new std::future<size_t>[filesCount];
-    
+    std::future<size_t>* sizesList = new std::future<size_t>[filesCount];
     
 
     size_t j = 0;
-    for (auto fileInfo : fileInfoList)
+
+    for (auto& fileInfo : fileInfoList)
     {
         if (fileInfo.suffix() == "html")
         {
-            listOfSizes[j] = std::async(std::launch::async, sizeOfCurve, std::ref(fileInfoList[j]), std::ref(m));
+            sizesList[j] = std::async(std::launch::async, sizeOfCurve, std::ref(fileInfo));
             j++;
         }
     }
 
-    QString tmp;
 
-    for (size_t i = 0; i < filesCount; ++i)
+    QMessageBox debug;
+    QString labelOfSizes;
+    for (int i = 0; i < filesCount; i++)
     {
-        tmp += QString::number(listOfSizes[i].get());
-        tmp += '\n';
+        labelOfSizes += QString::number(sizesList[i].get());
+        labelOfSizes += '\n';
     }
 
-
-    
-    m.setText(tmp);
-    m.exec();
+    debug.setText(labelOfSizes);
+    debug.exec();
 }
