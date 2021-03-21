@@ -12,6 +12,9 @@
 #include <stdexcept>
 #include <chrono>
 #include <time.h>
+#include <memory>
+
+
 
 
 Asyncprog::Asyncprog(QWidget *parent)
@@ -64,8 +67,7 @@ void Asyncprog::on_startButton_clicked()
     QDir dir("./files");
     QFileInfoList fileInfoList = dir.entryInfoList();
     size_t filesCount = htmlFilesCount(fileInfoList);
-    QPair <QString, std::future<size_t>>* sizesList = new QPair<QString, std::future<size_t>>[filesCount];
-
+    std::unique_ptr<QPair <QString, std::future<size_t>> []> sizesList(new QPair<QString, std::future<size_t>>[filesCount]);
     
     size_t j = 0;
     for (const auto& fileInfo : fileInfoList)
@@ -94,11 +96,10 @@ void Asyncprog::on_startButton_clicked()
         labelOfSizes = err.what();
     }
     
-
-
     labelOfSizes = QString::number(clock() - time) + '\n' + labelOfSizes;
     ui.statusBar->clearMessage();
     ui.ansLabel->setText(labelOfSizes);
+
 }
 
 void Asyncprog::on_startButton_pressed()
@@ -145,6 +146,8 @@ void Asyncprog::on_debugButton_clicked()
 
 
     ui.ansLabel->setText(labelOfSizes);
+
+    delete[] sizesList;
 }
 
 void debugsizeOfCurve(const QFileInfo& fileInfo, std::promise<size_t>& promise)
@@ -217,4 +220,5 @@ void Asyncprog::on_debugButton2_clicked()
 
 
     ui.ansLabel->setText(labelOfSizes);
+    delete[] sizesList;
 }

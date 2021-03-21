@@ -1,6 +1,7 @@
 *.sln
 *.ipch
 *.html
+*.vcxproj*
 .git/**
 .vs/**
 x64/**
