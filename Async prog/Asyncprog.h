@@ -12,6 +12,9 @@ public:
 
 private slots:
     void on_startButton_clicked();
+    void on_debugButton_clicked();
+    void on_debugButton2_clicked();
+    void on_startButton_pressed();
 
 private:
     Ui::AsyncprogClass ui;
