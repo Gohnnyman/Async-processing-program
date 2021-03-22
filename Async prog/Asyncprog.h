@@ -30,8 +30,10 @@ private slots:
     void on_startButton_pressed();
 
 private:
+    
     Ui::AsyncprogClass ui;
-};
 
+};
+void startButtonProcessing(Ui::AsyncprogClass&);
 size_t htmlFilesCount(const QFileInfoList&);
 size_t sizeOfCurve(const QFileInfo&);
