@@ -9,12 +9,10 @@ Asyncprog::Asyncprog(QWidget *parent)
     
 }
 
-
-
-size_t sizeOfCurve(const QFileInfo& fileInfo)
+size_t sizeOfCurve(const QString& filePath)
 {
     
-    QFile file(fileInfo.absoluteFilePath());
+    QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         throw std::logic_error("Can't open file");
@@ -35,20 +33,12 @@ size_t sizeOfCurve(const QFileInfo& fileInfo)
 }
 
 
-size_t htmlFilesCount(const QFileInfoList& fileInfoList)
-{
-    size_t filesCount = 0;
-    for (const auto& fileInfo : fileInfoList)
-    {
-        if (fileInfo.suffix() == "html") filesCount++;
-    }
-
-    return filesCount;
-}
 
 void Asyncprog::on_startButton_clicked()
-{       
-    std::thread th(startButtonProcessing, ui);
+{   
+    QStringList pathsList = QFileDialog::getOpenFileNames(this, "Select HTML files",
+        "./files", "HTML files (*.html)");
+    std::thread th(startButtonProcessing, ui, pathsList);
     th.detach();
 }
 
@@ -58,27 +48,22 @@ void Asyncprog::on_startButton_pressed()
     ui.ansLabel->clear();
 }
 
-void startButtonProcessing(Ui::AsyncprogClass& ui)
+void startButtonProcessing(Ui::AsyncprogClass& ui, const QStringList& pathsList)
 {
     time_t time = clock();
-    QDir dir("./files");
-    QFileInfoList fileInfoList = dir.entryInfoList();
-    size_t filesCount = htmlFilesCount(fileInfoList);
-    std::unique_ptr<QPair <QString, std::future<size_t>>[]> sizesList(new QPair<QString, std::future<size_t>>[filesCount]);
+    QString labelOfSizes;
+    size_t filesCount = pathsList.size();
+    std::unique_ptr<QPair <QString, std::future<size_t>>[]> 
+        sizesList(new QPair<QString, std::future<size_t>>[filesCount]);
 
     size_t j = 0;
-    for (const auto& fileInfo : fileInfoList)
+    for (const auto& path : pathsList)
     {
-        if (fileInfo.suffix() == "html")
-        {
-            sizesList[j].first = fileInfo.fileName();
-            sizesList[j].second = std::async(std::launch::async, sizeOfCurve, std::ref(fileInfo));
-            j++;
-        }
+        sizesList[j].first = path.right(path.size() - path.lastIndexOf("/") - 1);
+        sizesList[j].second = std::async(std::launch::async, sizeOfCurve, std::ref(path));
+        j++;
     }
 
-
-    QString labelOfSizes;
     try
     {
         for (int i = 0; i < filesCount; i++)
@@ -93,7 +78,8 @@ void startButtonProcessing(Ui::AsyncprogClass& ui)
         labelOfSizes = err.what();
     }
 
-    labelOfSizes = QString::number(clock() - time) + '\n' + labelOfSizes;
+    labelOfSizes = "Time (milliseconds): " + QString::number(clock() - time) + '\n' 
+        + labelOfSizes;
     ui.statusBar->clearMessage();
     ui.ansLabel->setText(labelOfSizes);
 }

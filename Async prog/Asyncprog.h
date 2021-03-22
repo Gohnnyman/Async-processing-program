@@ -12,6 +12,7 @@
 #include <QTextStream>
 #include <QDebug>
 #include <QPair>
+#include <QFileDialog>
 #include <stdexcept>
 #include <chrono>
 #include <time.h>
@@ -34,6 +35,5 @@ private:
     Ui::AsyncprogClass ui;
 
 };
-void startButtonProcessing(Ui::AsyncprogClass&);
-size_t htmlFilesCount(const QFileInfoList&);
-size_t sizeOfCurve(const QFileInfo&);
+void startButtonProcessing(Ui::AsyncprogClass&, const QStringList&);
+size_t sizeOfCurve(const QString&);

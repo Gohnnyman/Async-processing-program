@@ -3,64 +3,40 @@
 
 void Asyncprog::on_debugButton_clicked()
 {
-    time_t time = clock();
-    QDir dir("./files");
-    QFileInfoList fileInfoList = dir.entryInfoList();
-    size_t filesCount = htmlFilesCount(fileInfoList);
-    QPair <QString, int>* sizesList = new QPair<QString, int>[filesCount];
+    QStringList pathsList = QFileDialog::getOpenFileNames(this, "Select HTML files (DEBUG)",
+        "./files", "HTML files (*.html)");
 
+    time_t time = clock();
+    QString labelOfSizes;
+    size_t filesCount = pathsList.size();
+    std::unique_ptr<QPair <QString, size_t>[]>
+        sizesList(new QPair<QString, size_t>[filesCount]);
 
     size_t j = 0;
-
-    for (const auto& fileInfo : fileInfoList)
+    for (const auto& path : pathsList)
     {
-        if (fileInfo.suffix() == "html")
+        sizesList[j].first = path.right(path.size() - path.lastIndexOf("/") - 1);
+        sizesList[j].second = sizeOfCurve(path);
+        j++;
+    }
+
+    try
+    {
+        for (int i = 0; i < filesCount; i++)
         {
-            sizesList[j].first = fileInfo.fileName();
-            sizesList[j].second = sizeOfCurve(fileInfo);
-            j++;
+            labelOfSizes += sizesList[i].first + " : ";
+            labelOfSizes += QString::number(sizesList[i].second);
+            labelOfSizes += '\n';
         }
     }
-
-
-
-
-    QString labelOfSizes;
-    for (int i = 0; i < filesCount; i++)
+    catch (const std::exception& err)
     {
-        labelOfSizes += sizesList[i].first + " : ";
-        labelOfSizes += QString::number(sizesList[i].second);
-        labelOfSizes += '\n';
+        labelOfSizes = err.what();
     }
-    labelOfSizes = "DEBUG:\n" + QString::number(clock() - time) + '\n' + labelOfSizes;
+
+    labelOfSizes = "Time (milliseconds): " + QString::number(clock() - time) + '\n'
+        + labelOfSizes;
     ui.statusBar->clearMessage();
-
-
     ui.ansLabel->setText(labelOfSizes);
-
-    delete[] sizesList;
-}
-
-void debugsizeOfCurve(const QFileInfo& fileInfo, std::promise<size_t>& promise)
-{
-
-    QFile file(fileInfo.absoluteFilePath());
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        throw std::logic_error("File didn't open");
-    }
-
-    QTextStream in(&file);
-    QString line;
-    size_t rowCount = 0;
-
-
-    size_t n = 0;
-    while (!in.atEnd()) {
-        line = in.readLine();
-        if (line.indexOf("<tr>") != -1) rowCount++;
-    }
-
-    promise.set_value(rowCount);
 }
 
