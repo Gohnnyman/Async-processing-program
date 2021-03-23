@@ -1,8 +1,8 @@
-*.sln
+#*.sln
 *.ipch
 *.html
-*.vcxproj*
+#*.vcxproj*
 .git/**
-.vs/**
+#.vs/**
 x64/**
 Async prog/x64/**
