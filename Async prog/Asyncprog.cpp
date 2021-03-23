@@ -32,13 +32,11 @@ size_t sizeOfCurve(const QString& filePath)
     return rowCount;
 }
 
-
-
 void Asyncprog::on_startButton_clicked()
 {   
-    QString filePath = QString::fromStdString(toml::find<std::string>(data, "filePath"));
+    QString defaultDirectory = QString::fromStdString(toml::find<std::string>(data, "filePath"));
     QStringList pathsList = QFileDialog::getOpenFileNames(this, "Select HTML files",
-        filePath, "HTML files (*.html)");
+        defaultDirectory, "HTML files (*.html)");
     std::thread th(startButtonProcessing, ui, pathsList);
     th.detach();
 }
