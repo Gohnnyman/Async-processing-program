@@ -36,8 +36,9 @@ size_t sizeOfCurve(const QString& filePath)
 
 void Asyncprog::on_startButton_clicked()
 {   
+    QString filePath = QString::fromStdString(toml::find<std::string>(data, "filePath"));
     QStringList pathsList = QFileDialog::getOpenFileNames(this, "Select HTML files",
-        "./files", "HTML files (*.html)");
+        filePath, "HTML files (*.html)");
     std::thread th(startButtonProcessing, ui, pathsList);
     th.detach();
 }

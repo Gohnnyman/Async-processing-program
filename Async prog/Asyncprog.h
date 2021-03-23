@@ -2,6 +2,7 @@
 
 #include <QtWidgets/QMainWindow>
 #include "ui_Asyncprog.h"
+#include "toml11/toml.hpp"
 #include <QMessageBox>
 #include <Qdir>
 #include <QString>
@@ -11,7 +12,6 @@
 #include <future>
 #include <QTextStream>
 #include <QDebug>
-#include <QPair>
 #include <QFileDialog>
 #include <stdexcept>
 #include <chrono>
@@ -33,7 +33,7 @@ private slots:
 private:
     
     Ui::AsyncprogClass ui;
-
+    toml::value data = toml::parse("inf.toml");
 };
 void startButtonProcessing(Ui::AsyncprogClass&, const QStringList&);
 size_t sizeOfCurve(const QString&);
