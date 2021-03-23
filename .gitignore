@@ -3,6 +3,6 @@
 *.html
 #*.vcxproj*
 .git/**
-#.vs/**
+.vs/**
 x64/**
 Async prog/x64/**
